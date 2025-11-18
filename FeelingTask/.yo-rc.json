@@ -1,0 +1,21 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "16.19.0",
+    "sdksVersions": {
+      "@microsoft/microsoft-graph-client": "3.0.2",
+      "@microsoft/teams-js": "2.24.0"
+    },
+    "version": "1.20.0",
+    "libraryName": "feeling-task",
+    "libraryId": "f662fee0-5dbb-4a5a-afc0-0c501a5af884",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "feeling-task",
+    "solutionShortDescription": "feeling-task description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}

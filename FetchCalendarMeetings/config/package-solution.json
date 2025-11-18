@@ -1,0 +1,42 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "GetzPortal-CalendarMeetings",
+    "id": "99731ab0-ac89-48cd-8441-df4348251317",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.19.0"
+    }, "webApiPermissionRequests": [
+    { "resource": "Microsoft Graph", "scope": "Calendars.ReadBasic" }
+  ],
+    "metadata": {
+      "shortDescription": {
+        "default": "GetzPortal-CalendarMeetings description"
+      },
+      "longDescription": {
+        "default": "GetzPortal-CalendarMeetings description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "GetzPortal-CalendarMeetings Feature",
+        "description": "The feature that activates elements of the GetzPortal-CalendarMeetings solution.",
+        "id": "3dfde647-9ef6-4eb0-9702-20c43a5e23c8",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/GetzPortal-CalendarMeetings.sppkg"
+  }
+}

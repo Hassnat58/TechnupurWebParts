@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "feeling-response-client-side-solution",
+    "id": "f662fee0-5dbb-4a5a-afc0-0c501a5af884",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.20.0"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "feeling-response description"
+      },
+      "longDescription": {
+        "default": "feeling-response description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "feeling-response Feature",
+        "description": "The feature that activates elements of the feeling-response solution.",
+        "id": "0cc04ca5-329b-475b-bc20-70a9425183ac",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/feeling-response.sppkg"
+  }
+}

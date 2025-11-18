@@ -1,0 +1,29 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/spfx-serve.schema.json",
+  "port": 4321,
+  "https": true,
+  "serveConfigurations": {
+    "default": {
+      "pageUrl": "https://5jd7y6.sharepoint.com/sites/GetzPharma/SitePages/CollabHome.aspx",
+      "customActions": {
+        "90157b75-3f58-45ee-8207-ece1d2e32cce": {
+          "location": "ClientSideExtension.ApplicationCustomizer",
+          "properties": {
+            "testMessage": "Testing GetzPharma Extension Header"
+          }
+        }
+      }
+    },
+    "getzpharmaheaderExtension": {
+      "pageUrl": "https://5jd7y6.sharepoint.com/sites/GetzPharma/SitePages/CollabHome.aspx",
+      "customActions": {
+        "90157b75-3f58-45ee-8207-ece1d2e32cce": {
+          "location": "ClientSideExtension.ApplicationCustomizer",
+          "properties": {
+            "testMessage": "Testing GetzPharma Extension Header"
+          }
+        }
+      }
+    }
+  }
+}

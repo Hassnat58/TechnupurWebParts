@@ -1,0 +1,35 @@
+.container {
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+  
+      h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+      }
+  
+      .search-input {
+        width: 300px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 8px 12px;
+        font-size: 14px;
+  
+        &::placeholder {
+          color: #aaa;
+        }
+      }
+    }
+  
+    .content {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  }

@@ -1,0 +1,136 @@
+import {
+  BaseApplicationCustomizer,
+  PlaceholderName,
+  PlaceholderContent
+} from '@microsoft/sp-application-base';
+import { sp } from "@pnp/sp";
+import "@pnp/sp/webs";
+import "@pnp/sp/lists";
+import "@pnp/sp/items";
+
+export interface IGetzpharmaheaderExtensionApplicationCustomizerProperties {
+  testMessage: string;
+}
+
+export default class GetzpharmaheaderExtensionApplicationCustomizer
+  extends BaseApplicationCustomizer<IGetzpharmaheaderExtensionApplicationCustomizerProperties> {
+
+  public topPlaceholder: PlaceholderContent | undefined;
+
+  public onInit(): Promise<void> {
+    sp.setup({
+      spfxContext: this.context as any
+    });
+    this.context.placeholderProvider.changedEvent.add(this, this.renderCustomHeader);
+    return Promise.resolve();
+  }
+
+  private async fetchNavigationData() {
+    try {
+      const headerItems = await sp.web.lists.getByTitle("Header")
+        .items.select("ID", "GP_PrimaryLinkTitle").get();
+
+      const subHeaderItems = await sp.web.lists.getByTitle("SubHeader")
+        .items.select("PrimaryLinkIDL/ID", "GP_SublinkTitle")
+        .expand("PrimaryLinkIDL").get();
+
+      return headerItems.map(item => ({
+        title: item.GP_PrimaryLinkTitle,
+        subLinks: subHeaderItems
+          .filter(subItem => subItem.PrimaryLinkIDL?.ID === item.ID)
+          .map(subItem => subItem.GP_SublinkTitle)
+      }));
+    } catch (error) {
+      console.error("Error fetching navigation:", error);
+      return [];
+    }
+  }
+
+  public async renderCustomHeader(): Promise<void> {
+    if (!this.topPlaceholder) {
+      this.topPlaceholder = this.context.placeholderProvider.tryCreateContent(PlaceholderName.Top);
+
+      if (this.topPlaceholder && this.topPlaceholder.domElement) {
+        //const imageUrl = this.context.pageContext.web.absoluteUrl + '/SiteAssets/GPLogo.png';
+        const navData = await this.fetchNavigationData();
+
+        this.topPlaceholder.domElement.innerHTML = `
+          <div class="custom-header">
+            <nav class="nav-menu">
+              <ul class="nav-list">
+                ${navData.map(item => `
+                  <li class="nav-item ${item.subLinks?.length ? 'has-dropdown' : ''}">
+                    <a href="#" class="nav-link">${item.title}</a>
+                    ${item.subLinks?.length ? `
+                      <ul class="dropdown-menu">
+                        ${item.subLinks.map(subLink => `
+                          <li class="dropdown-item">
+                            <a href="#">${subLink}</a>
+                          </li>
+                        `).join('')}
+                      </ul>
+                    ` : ''}
+                  </li>
+                `).join('')}
+              </ul>
+            </nav>
+          </div>
+          <style>
+            .custom-header {
+              background: white;
+              padding: 10px 0;
+              border-bottom: 1px solid #e5e5e5;
+            }
+            .nav-menu {
+              max-width: 1200px;
+              margin: 0 auto;
+              padding: 0 15px;
+            }
+            .nav-list {
+              list-style: none;
+              padding: 0;
+              margin: 0;
+              display: flex;
+              gap: 20px;
+            }
+            .nav-item {
+              position: relative;
+            }
+            .nav-link {
+              color: #333;
+              text-decoration: none;
+              padding: 10px 15px;
+              display: block;
+            }
+            .dropdown-menu {
+              display: none;
+              position: absolute;
+              top: 100%;
+              left: 0;
+              background: white;
+              min-width: 200px;
+              box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+              border-radius: 4px;
+              padding: 8px 0;
+              z-index: 1000;
+            }
+            .nav-item:hover .dropdown-menu {
+              display: block;
+            }
+            .dropdown-item {
+              padding: 8px 15px;
+            }
+            .dropdown-item a {
+              color: #333;
+              text-decoration: none;
+              display: block;
+            }
+            .dropdown-item:hover {
+              background: #f5f5f5;
+            }
+          </style>
+        `;
+      }
+    }
+  }
+}

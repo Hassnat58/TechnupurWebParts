@@ -1,0 +1,15 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-extension-manifest.schema.json",
+
+  "id": "90157b75-3f58-45ee-8207-ece1d2e32cce",
+  "alias": "GetzpharmaheaderExtensionApplicationCust",
+  "componentType": "Extension",
+  "extensionType": "ApplicationCustomizer",
+
+  
+  "version": "*",
+  "manifestVersion": 2,
+
+  
+  "requiresCustomScript": false
+}

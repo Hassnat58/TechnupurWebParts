@@ -1,0 +1,741 @@
+@import './customviews';
+@import './customprofilepopup';
+
+#workbenchPageContent,
+.CanvasComponent.LCS .CanvasZone {
+  display: none;
+  max-width: 100% !important;
+  visibility: none;
+}
+
+.orgchartMain {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.screen0Container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f8f9fa;
+  padding: 20px;
+  overflow-x: hidden; /* Explicitly disable horizontal scrolling for Screen0 and Screen2 */
+
+  h2 {
+    font-size: 24px;
+    margin-bottom: 30px;
+    color: #333;
+  }
+
+  .viewButtons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+  }
+
+  .viewButton {
+    padding: 12px 24px;
+    background-color: #0078d4;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.15s ease-in-out;
+
+    &:hover {
+      background-color: #005a9e;
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+  }
+}
+
+.orgchartContainer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  box-sizing: border-box;
+  overflow-x: hidden; /* Keep this as hidden, as scrolling is handled by orgchartWrapper */
+  display: flex;
+  flex-direction: column;
+
+  .searchBar {
+    padding: 15px 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+
+    input {
+      width: 100%;
+      max-width: 400px;
+      padding: 8px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 14px;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+      &:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+    }
+  }
+
+  .backButton {
+    padding: 8px 12px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.15s ease-in-out;
+    white-space: nowrap;
+
+    &:hover {
+      background-color: #5a6268;
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+  }
+
+  .zoomButton {
+    padding: 5px 10px;
+    background-color: #00205c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 20px;
+    transition: background-color 0.15s ease-in-out;
+    white-space: nowrap;
+  }
+}
+
+.directorNode {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  &:hover::after {
+    opacity: 1;
+  }
+}
+
+.orgchartWrapper {
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  position: relative;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: auto; /* Enable horizontal scrolling */
+  display: block; /* Remove flex to allow natural content width */
+
+  &::-webkit-scrollbar {
+    height: 8px; /* Ensure the horizontal scrollbar is visible */
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+
+    &:hover {
+      background: #666;
+    }
+  }
+
+  .orgchart {
+    display: flex; /* Use flex to center the content */
+    justify-content: center; /* Center the content horizontally */
+    min-width: fit-content; /* Ensure the chart is at least as wide as its content */
+
+    .scrollContainer {
+      display: flex; /* Use flex to lay out the cards in a row */
+      justify-content: center; /* Center the cards within scrollContainer */
+      align-items: flex-start; /* Align cards to the top */
+      min-width: fit-content; /* Ensure the container is at least as wide as its content */
+      gap: 40px; /* Match the gap used elsewhere */
+    }
+  }
+}
+
+.executive {
+  background-color: #00205c;
+}
+
+.node.topLevel {
+  //background-color: #00205c !important;
+  color: white;
+}
+
+.node.immediateChild {
+ // background-color: #29ACE2 !important;
+  color: black;
+}
+
+.toplevelexecutives {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 20px 0;
+  gap: 20px;
+}
+
+.executivesRow {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 20px 0;
+  gap: 20px;
+}
+
+.executiveColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 280px;
+}
+
+.managerNode {
+  position: relative;
+}
+
+.employeeSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.node {
+  padding: 15px;
+  color: white;
+  cursor: pointer;
+  margin: 0 auto;
+  position: relative;
+  flex-shrink: 0;
+  min-width: 350px;
+  transition: all 0.3s ease;
+
+  &.selected {
+    transform: scale(1.05) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+    }
+  }
+
+  .cardContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    padding-right: 60px;
+  }
+
+  .employeeInfo {
+    text-align: center;
+    flex-grow: 1;
+    padding-right: 80px;
+  }
+
+  .name {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .title {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 4px;
+  }
+
+  .phone {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 4px;
+  }
+
+  .email {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 4px;
+  }
+
+  .location {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 4px;
+  }
+
+  .department {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 4px;
+  }
+
+  .avatarContainer {
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 150px;
+    height: 103px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+  }
+
+  .avatar {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: absolute;
+    right: 0;
+  }
+}
+
+.default {
+  //background-color: #dadbdc;
+  color: black;
+}
+
+.departments {
+  position: relative;
+  padding-top: 30px;
+  margin-top: 1px;
+  width: 100%;
+
+  &.selectedView {
+    &::before,
+    &::after {
+      display: none !important;
+    }
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 40px;
+    width: 2px;
+   // background-color: black;
+    transform: translateX(-50%);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    width: calc(100% - 160px);
+    height: 2px;
+   // background-color: black;
+    transform: translateX(-50%);
+    display: none;
+  }
+
+  &[data-department-count="1"] {
+    &::before,
+    &::after {
+      display: none;
+    }
+  }
+}
+
+.childrenWrapper {
+  flex-wrap: nowrap;
+}
+
+.childrenWrapperwithDepartment {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  position: relative;
+  flex-wrap: nowrap;
+}
+
+.departmentColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.childrenContainer {
+  position: relative;
+  padding-top: 53px;
+  margin-top: 2px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 40px;
+    width: 2px;
+    //background-color: black; //Lines Color
+    transform: translateX(-50%);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    width: calc(100% - 1px);
+    height: 2px;
+    //background-color: black; //Lines Color
+    transform: translateX(-50%);
+  }
+
+  &[data-parent-id] {
+    &::before,
+    &::after {
+      display: block;
+    }
+  }
+}
+
+.childNode {
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    height: 20px;
+    width: 2px;
+    //background-color: black;
+    transform: translateX(-50%);
+  }
+}
+
+.noDepartmentWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 40px;
+}
+
+.horizontalNoDepartment {
+  .departmentColumn {
+    flex-direction: row;
+    gap: 40px;
+
+    .childContainer {
+      &::before,
+      &::after {
+        display: none;
+      }
+    }
+  }
+}
+
+.selectedCard {
+  transform: scale(1.05) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+  }
+}
+
+.departmentBox {
+  background-color: #515153;
+  border: 1px solid #CBD5E0;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 20px;
+  text-align: center;
+  min-width: 200px;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    height: 40px;
+    width: 2px;
+   // background-color: black;
+    transform: translateX(-50%);
+  }
+}
+
+.directorChildren {
+  transition: all 0.3s ease;
+  overflow: hidden;
+
+  &::after {
+    display: none;
+  }
+}
+
+.verticalChildren {
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  transition: all 0.3s ease;
+
+  .childContainer {
+    position: relative;
+    transition: all 0.3s ease;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      height: 20px;
+      width: 2px;
+      //background-color: black;
+      transform: translateX(-50%);
+      transition: all 0.3s ease;
+    }
+
+    &:first-child::before {
+      height: 20px;
+    }
+  }
+}
+
+.expanded {
+  transform: scale(1.02);
+}
+
+.childContainer {
+  position: relative;
+  margin-bottom: 20px;
+
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    height: 20px;
+    width: 2px;
+    //background-color: black;
+    transform: translateX(-50%);
+  }
+
+  &:first-child::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    height: 20px;
+    width: 2px;
+    //background-color: black;
+    transform: translateX(-50%);
+  }
+}
+
+.hierarchical {
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+
+  .childContainer {
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      height: 20px;
+      width: 2px;
+     // background-color: black;
+      transform: translateX(-50%);
+    }
+
+    &:first-child::before {
+      height: 20px;
+    }
+
+    &:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      height: 20px;
+      width: 2px;
+     // background-color: black;
+      transform: translateX(-50%);
+    }
+  }
+}
+
+.viewTitle {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #00205c;
+  text-transform: uppercase;
+}
+
+.managerTree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.managerTreeWrapper {
+  .node.default {
+    background-color: #00205c !important;
+    color: white !important;
+  }
+}
+
+.managerCard {
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+.managerTreeWrapper {
+  margin-bottom: 20px;
+}
+
+.treeConnector {
+  position: relative;
+  width: 100%;
+
+  .verticalLine {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    width: 2px;
+    height: 20px;
+    //background-color: #000;
+    transform: translateX(-50%);
+  }
+
+  .horizontalLine {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 2px;
+    //background-color: #000;
+  }
+}
+
+.treeButtons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+
+  .buttonWrapper {
+    position: relative;
+
+    .buttonConnector {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      width: 2px;
+      height: 10px;
+        //background-color: #000;
+      transform: translateX(-50%);
+    }
+
+    button {
+      padding: 12px 24px;
+      background-color: #29ADE3;
+      color: black;
+      font-weight:500;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: background-color 0.15s ease-in-out;
+      width:150px;  //Remove these if they cause any issues
+      height: 80px;   //Remove these if they cause any issues
+
+      &:hover {
+        background-color: #1E91C2;
+      }
+
+      &:focus {
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+    }
+  }
+}
+
+.hidden {
+  visibility: hidden;
+}
+

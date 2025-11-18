@@ -1,0 +1,170 @@
+// customviews.scss
+
+// Common styles for views with departments
+@mixin department-view-styles {
+  .childrenContainer {
+    &::before {
+      //height: 195px;
+      //background-color: black;
+      display: none;
+    }
+  }
+
+  .departmentColumn {
+    .childrenContainer {
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding-top: 40px;
+
+      &::before {
+        height: 40px;
+      }
+    }
+
+    position: relative;
+
+    &:not(:last-child) {
+      .departmentBox::after {
+        content: '';
+        position: absolute;
+        bottom: -40px;
+        left: 50%;
+        height: 40px;
+        width: 2px;
+        //background-color: black;
+        transform: translateX(-50%);
+      }
+    }
+  }
+}
+
+// Common styles for views without departments
+@mixin no-department-view-styles {
+  .childrenContainer {
+    &::before {
+      height: 195px;
+      //background-color: black;
+    }
+
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding-top: 40px;
+
+    &::before {
+      height: 40px;
+    }
+  }
+}
+
+// Specific custom views with departments
+.orgchartContainer {
+  &.view-southeast-texas-public-infrastructure {
+    @include department-view-styles;
+
+    .departmentColumn {
+      &:not(:last-child) {
+        .departmentBox::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          right: -180px;
+          width: 180px;
+          height: 2px;
+          //background-color: red;
+          transform: translateY(-50%);
+        }
+      }
+
+      //All Horizontal Lines have been hidden in below code
+      .departments::before {
+        display: none;
+      }
+
+      .childrenContainer::before {
+          display: none;
+      }
+
+      .childrenContainer::after {
+        display: none;
+    }
+
+    .childContainer::before {
+      display: none;
+  }
+
+     .childContainer::after {
+    display: none;
+}
+      .departmentBox::after {
+        display: none;
+      }
+
+      .childNode::before {
+        display: none;
+    }
+
+      .childNode::after {
+          display: none;
+      }
+    }
+  }
+
+  &.view-shared-services {
+    @include department-view-styles;
+
+    //All Horizontal Lines have been hidden in below code
+      .departments::before {
+        display: none;
+      }
+
+      .childrenContainer::before {
+          display: none;
+      }
+
+      .childrenContainer::after {
+        display: none;
+    }
+
+    .childContainer::before {
+      display: none;
+  }
+
+     .childContainer::after {
+    display: none;
+}
+      .departmentBox::after {
+        display: none;
+      }
+
+      .childNode::before {
+        display: none;
+    }
+
+      .childNode::after {
+          display: none;
+      }
+  }
+
+  // Specific custom views without departments
+  &.view-hydrology {
+    @include no-department-view-styles;
+  }
+
+  &.view-adaptive-program-management {
+    @include no-department-view-styles;
+  }
+
+  &.view-environmental {
+    @include no-department-view-styles;
+  }
+
+  // &.view-central-texas-public-works {
+  //   @include no-department-view-styles;
+  // }
+
+  &.view-central-texas-site-development {
+    @include no-department-view-styles;
+  }
+}

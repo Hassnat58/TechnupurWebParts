@@ -1,0 +1,48 @@
+.staffDirectoryContainer {
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  
+    .title {
+      display: flex;
+      align-items: center;
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 20px;
+  
+      .icon {
+        font-size: 20px;
+        margin-right: 10px;
+      }
+    }
+  
+    .searchInput {
+      margin-bottom: 20px;
+      width: 300px;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+  
+      &::placeholder {
+        color: #aaa;
+      }
+    }
+  
+    .ms-DetailsList {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      .ms-DetailsRow {
+        &:hover {
+          background: #f9f9f9;
+        }
+      }
+      .ms-DetailsHeader {
+        background: #f3f3f3;
+        font-weight: 600;
+      }
+    }
+  }
+  

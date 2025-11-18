@@ -1,0 +1,42 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "eventswebpart-client-side-solution",
+    "id": "de0fafed-49ab-4da8-a8a0-18cbe58c7b09",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.19.0"
+    },"webApiPermissionRequests": [
+    { "resource": "Microsoft Graph", "scope": "User.Read" }
+  ],
+    "metadata": {
+      "shortDescription": {
+        "default": "eventswebpart description"
+      },
+      "longDescription": {
+        "default": "eventswebpart description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "eventswebpart Feature",
+        "description": "The feature that activates elements of the eventswebpart solution.",
+        "id": "5cc4a26f-f2b9-4b53-a365-121f0d72da6f",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/eventswebpart.sppkg"
+  }
+}

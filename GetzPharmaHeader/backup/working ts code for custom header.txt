@@ -1,0 +1,89 @@
+import {
+  BaseApplicationCustomizer,
+  PlaceholderName,
+  PlaceholderContent
+} from '@microsoft/sp-application-base';
+
+export interface IGetzpharmaheaderExtensionApplicationCustomizerProperties {
+  testMessage: string;
+}
+
+export default class GetzpharmaheaderExtensionApplicationCustomizer
+  extends BaseApplicationCustomizer<IGetzpharmaheaderExtensionApplicationCustomizerProperties> {
+  
+  public topPlaceholder: PlaceholderContent | undefined;
+
+  public onInit(): Promise<void> {
+    // Add an event listener for changes in placeholder availability
+    this.context.placeholderProvider.changedEvent.add(this, this.CustomHeader);
+    return Promise.resolve();
+  }
+  
+  public CustomHeader(): void {
+    // Check if the Top placeholder is available
+    if (!this.topPlaceholder) {
+      this.topPlaceholder = this.context.placeholderProvider.tryCreateContent(PlaceholderName.Top);
+
+      if (this.topPlaceholder && this.topPlaceholder.domElement) {
+        this.topPlaceholder.domElement.innerHTML = `
+          <header class="header">
+            <div class="header-content">
+              <div class="logo">
+                <img src="path/to/your/logo.png" alt="Getz Pharma Logo">
+              </div>
+              <nav class="navigation">
+                <ul>
+                  <li><a href="#">Home</a></li>
+                  <li><a href="#">Division</a></li>
+                  <li><a href="#">Application</a></li>
+                  <li><a href="#">Forms</a></li>
+                  <li><a href="#">Delegation</a></li>
+                  <li><a href="#">Pending Task</a></li>
+                </ul>
+              </nav>
+            </div>
+          </header>
+
+          
+          <style>
+            .header {
+              background-color: #003672;
+              color: #ffffff;
+              height: 60px;
+              display: flex;
+              align-items: center;
+              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            .header-content {
+              max-width: 1200px;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              width: 100%;
+              padding: 0 20px;
+            }
+            .logo img {
+              height: 40px;
+            }
+            .navigation ul {
+              list-style: none;
+              display: flex;
+              margin: 0;
+              padding: 0;
+            }
+            .navigation li {
+              margin-left: 30px;
+            }
+            .navigation a {
+              color: #ffffff;
+              text-decoration: none;
+              font-weight: 500;
+            }
+          </style>
+        `;
+      } else {
+        console.warn('The Top placeholder is not available.');
+      }
+    }
+  }
+}

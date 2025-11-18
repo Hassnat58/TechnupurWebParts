@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "staff-directory-list-client-side-solution",
+    "id": "06db3450-7b78-409b-ab9d-b3e7c988d40a",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.19.0"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "staff-directory-list description"
+      },
+      "longDescription": {
+        "default": "staff-directory-list description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "staff-directory-list Feature",
+        "description": "The feature that activates elements of the staff-directory-list solution.",
+        "id": "942216b5-a1d3-4ea2-aa5d-e0dcd903d613",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/staff-directory-list.sppkg"
+  }
+}

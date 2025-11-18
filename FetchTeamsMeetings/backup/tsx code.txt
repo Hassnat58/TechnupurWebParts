@@ -1,0 +1,65 @@
+import * as React from 'react';
+//import styles from './Fetchteamsmeetingswebpart.module.scss';
+import type { IFetchteamsmeetingswebpartProps } from './IFetchteamsmeetingswebpartProps';
+import {DetailsList, PrimaryButton } from '@fluentui/react';
+//import {MSGraphClient} from "@microsoft/sp-http";
+import { MSGraphClientV3 } from '@microsoft/sp-http';
+//import * as MicrosoftGraph from '@microsoft/microsoft-graph-types';
+//version("v1.0")
+
+export interface IUser {
+  displayName : string;
+  mail : string;
+}
+
+export interface IUserState {
+  userState: IUser[];
+
+}
+
+
+export default class Fetchteamsmeetingswebpart extends React.Component<IFetchteamsmeetingswebpartProps,IUserState, {}> {
+  constructor(props:IFetchteamsmeetingswebpartProps) {
+    super(props);
+    this.state = { userState: [] };
+  }
+
+
+  public allusers : IUser[] = [];
+  
+  public GetUsers = (): void => {
+    this.props.context.msGraphClientFactory
+      .getClient('3') // Specify version 3
+      .then((msGraphClient: MSGraphClientV3): void => {
+        msGraphClient.api("users").version("v1.0").select("displayName,mail").get((err,res : any) =>
+          {
+            
+            if(err) {
+              console.log("Error Occured", err);
+            }
+            console.log("Error Occured", err);
+            console.log("Response", res);
+            res.value.map((result: any) => {
+              this.allusers.push({
+                displayName: result.displayName,
+                mail: result.mail,
+              });
+            });
+            this.setState({userState:this.allusers});
+      }); 
+  });
+};
+
+  public render(): React.ReactElement<IFetchteamsmeetingswebpartProps> {
+    
+    return (
+
+      <div>
+        <PrimaryButton text='Search Users'
+        onClick={this.GetUsers}
+        ></PrimaryButton>
+        <DetailsList items = {this.state.userState}></DetailsList>
+      </div>
+    );
+  }
+}

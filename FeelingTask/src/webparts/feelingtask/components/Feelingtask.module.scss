@@ -1,0 +1,253 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  background-color: #ffffff;
+  position: relative;
+  height: 250px;
+  overflow: hidden; /* Prevent scrollbars */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Distribute space to keep content in bounds */
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.question {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 10px; /* Reduced margin to save space */
+  color: #333;
+  position: relative;
+  z-index: 1;
+  top: 10px;
+}
+
+.backButton {
+  background: #fff;
+  border-radius: 100%;
+  font-size: 1.1rem;
+  color: blue;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  left: -1px;
+  top: -18px;
+  z-index: 2;
+  animation: moveLeft 0.2s forwards;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@keyframes moveLeft {
+  from {
+    transform: translate(10px); 
+  }
+  to {
+    transform: translate(0);
+  }
+} 
+
+.emojiContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Enforce 4 columns consistently */
+  grid-template-rows: repeat(4, auto); /* Allow rows to adjust based on content */
+  gap: 2px;
+  margin-bottom: 15px; /* Increased margin to prevent overlap with submit button */
+  position: relative;
+  max-height: 120px; /* Limit height to fit within container */
+  overflow: hidden; /* Prevent overflow of emojis */
+  width: 100%; /* Ensure it takes full available width */
+  box-sizing: border-box;
+
+  @media screen and (min-width: 900px) {
+    grid-template-columns: repeat(4, 1fr); /* Keep 4x4 grid even on larger screens */
+    max-height: 120px;
+    max-width: 100%;
+    top: 10px;
+    gap: 3px;
+  }
+
+  @media screen and (max-width: 600px) {
+    grid-template-columns: repeat(4, 1fr); /* Ensure 4 columns on smaller screens */
+    gap: 1px; /* Smaller gap for smaller screens */
+    max-height: 110px; /* Adjust for smaller screens */
+  }
+
+  @media screen and (max-width: 400px) {
+    grid-template-columns: repeat(4, 1fr); /* Maintain 4 columns on very small screens */
+    max-height: 100px; /* Further adjust for very small screens */
+    gap: 1px;
+  }
+}
+
+.emojiOption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 2px;
+  border-radius: 8px;
+  margin: 0;
+  width: 100%;
+  min-width: 35px; /* Reduced size for better fit */
+  max-width: 50px; /* Reduced size for better fit */
+  box-sizing: border-box;
+  position: relative;
+
+  @media screen and (min-width: 610px) {
+    width: 60px; /* Adjusted for better fit in 4x4 grid */
+    min-width: 50px;
+    max-width: 60px;
+    margin: 0 1px 5px; /* Reduced margins for tighter grid */
+    padding: 3px;
+  }
+
+  &:hover:not(.disabled) {
+    background-color: #f3f2f1;
+    transform: translateY(-3px);
+  }
+
+  &.selected {
+    background-color: #e1f1ff;
+    border: 2px solid #0078d4;
+    top:10px;
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  &.hidden {
+    display: none;
+  }
+
+  @media screen and (max-width: 600px) {
+    padding: 1px; /* Smaller padding */
+    min-width: 30px;
+    max-width: 45px;
+  }
+}
+
+.backgroundVideo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.emoji {
+  position: relative;
+  margin-bottom: 2px; /* Reduced margin */
+  width: 20px; /* Smaller emojis to fit better */
+  height: 20px;
+  z-index: 1;
+
+  @media screen and (min-width: 601px) {
+    width: 25px;
+    height: 25px;
+  }
+
+  @media screen and (max-width: 600px) {
+    width: 18px;
+    height: 18px;
+  }
+
+  picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .staticEmoji {
+    display: block;
+  }
+
+  .animatedEmoji {
+    display: none;
+  }
+}
+
+.emojiName {
+  font-size: 10px; /* Smaller font size */
+  text-align: center;
+  z-index: 1;
+
+  @media screen and (min-width: 601px) {
+    font-size: 9px;
+    font-weight: 600;
+  }
+
+  @media screen and (max-width: 600px) {
+    font-size: 9px;
+  }
+}
+
+.submitButton {
+  min-width: 100px;
+  position: relative;
+  z-index: 1;
+  margin-top: 15px; /* Added margin to ensure no overlap with emojiContainer */
+}
+
+.messageBar {
+  margin-bottom: 10px; /* Reduced margin */
+  position: relative;
+  z-index: 1;
+}
+
+.alreadySubmitted {
+  background-color: #f3f2f1;
+  padding: 15px;
+  border-radius: 4px;
+  text-align: center;
+  margin-top: 10px; /* Reduced margin */
+  color: #555;
+  font-style: italic;
+  position: relative;
+  z-index: 1;
+}
+
+.questionBlock {
+  margin-bottom: 10px; /* Reduced margin to fit within container */
+  position: relative;
+  min-height: 100px; /* Reduced to fit within container */
+}
+
+.submittedMessage {
+  background-color: #f3f2f1;
+  padding: 15px;
+  border-radius: 4px;
+  text-align: center;
+  color: #555;
+  font-style: italic;
+  position: absolute;
+  bottom: -160px;
+  left: 0;
+  right: 0;
+  z-index: 1;
+}

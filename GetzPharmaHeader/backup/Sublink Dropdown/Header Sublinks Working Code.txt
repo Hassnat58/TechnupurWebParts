@@ -1,0 +1,247 @@
+import {
+  BaseApplicationCustomizer,
+  PlaceholderName,
+  PlaceholderContent
+} from '@microsoft/sp-application-base';
+import { sp } from "@pnp/sp";
+import "@pnp/sp/webs";
+import "@pnp/sp/lists";
+import "@pnp/sp/items";
+
+export interface IGetzpharmaheaderExtensionApplicationCustomizerProperties {
+  testMessage: string;
+}
+
+export default class GetzpharmaheaderExtensionApplicationCustomizer
+  extends BaseApplicationCustomizer<IGetzpharmaheaderExtensionApplicationCustomizerProperties> {
+
+  public topPlaceholder: PlaceholderContent | undefined;
+
+  public onInit(): Promise<void> {
+    sp.setup({
+      spfxContext: this.context as any
+    });
+    this.context.placeholderProvider.changedEvent.add(this, this.renderCustomHeader);
+    return Promise.resolve();
+  }
+
+  private toggleMenu(): void {
+    const nav = document.querySelector('.navigation') as HTMLElement;
+    if (nav) {
+      nav.classList.toggle('active');
+    }
+  }
+
+  private async fetchNavigationData() {
+    try {
+      const headerItems = await sp.web.lists.getByTitle("Header")
+        .items.select("ID", "GP_PrimaryLinkTitle").get();
+
+      const subHeaderItems = await sp.web.lists.getByTitle("SubHeader")
+        .items.select("PrimaryLinkIDL/ID", "GP_SublinkTitle")
+        .expand("PrimaryLinkIDL").get();
+
+      return headerItems.map(item => ({
+        title: item.GP_PrimaryLinkTitle,
+        subLinks: subHeaderItems
+          .filter(subItem => subItem.PrimaryLinkIDL?.ID === item.ID)
+          .map(subItem => subItem.GP_SublinkTitle)
+      }));
+    } catch (error) {
+      console.error("Error fetching navigation:", error);
+      return [];
+    }
+  }
+
+  public async renderCustomHeader(): Promise<void> {
+    if (!this.topPlaceholder) {
+      this.topPlaceholder = this.context.placeholderProvider.tryCreateContent(PlaceholderName.Top);
+
+      if (this.topPlaceholder && this.topPlaceholder.domElement) {
+        const imageUrl = this.context.pageContext.web.absoluteUrl + '/SiteAssets/GPLogo.png';
+        const navData = await this.fetchNavigationData();
+
+        this.topPlaceholder.domElement.innerHTML = `
+          <header class="header">
+            <div class="header-content">
+              <div class="left-section">
+                <button class="hamburger" aria-label="Toggle menu">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </button>
+                <div class="logo">
+                  <img src="${imageUrl}" alt="Getz Pharma Logo">
+                </div>
+              </div>
+              <nav class="navigation">
+                <ul>
+                  ${navData.map(item => `
+                    <li class="${item.subLinks?.length ? 'has-dropdown' : ''}">
+                      <a href="#">${item.title}</a>
+                      ${item.subLinks?.length ? `
+                        <ul class="dropdown">
+                          ${item.subLinks.map(subLink => `
+                            <li><a href="#">${subLink}</a></li>
+                          `).join('')}
+                        </ul>
+                      ` : ''}
+                    </li>
+                  `).join('')}
+                </ul>
+              </nav>
+            </div>
+          </header>
+          <style>
+            .header {
+              background-color: white;
+              color: #FFFFFF;
+              height: 57px;
+              display: flex;
+              align-items: center;
+              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+              position: relative;
+              z-index: 1000;
+              width: 100%;
+            }
+            .header-content {
+              display: flex;
+              align-items: center;
+              width: 100%;
+              padding: 0 20px;
+              margin: 0 auto;
+              position: relative;
+            }
+            .left-section {
+              display: flex;
+              align-items: center;
+              gap: 15px;
+              flex-shrink: 0;
+            }
+            .logo {
+              margin-right: 20px;
+            }
+            .logo img {
+              height: 45px;
+              width: 93.19px;
+            }
+            .navigation {
+              flex-grow: 1;
+              display: flex;
+              justify-content: center;
+            }
+            .navigation ul {
+              list-style: none;
+              display: flex;
+              margin: 0;
+              padding: 0;
+              gap: 40px;
+            }
+            .navigation li {
+              margin: 0;
+              position: relative;
+            }
+            .navigation a {
+              color: #2A3440;
+              text-decoration: none;
+              font-weight: 500;
+              font-family: 'Barlow';
+              line-height: 17.07px;
+              font-size: 14.22px;
+              white-space: nowrap;
+            }
+            .dropdown {
+              display: none;
+              position: absolute;
+              top: 100%;
+              left: 0;
+              background: white;
+              min-width: 200px;
+              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+              padding: 8px 0;
+            }
+            .has-dropdown:hover .dropdown {
+              display: block;
+            }
+            .dropdown li {
+              padding: 8px 16px;
+            }
+            .dropdown a:hover {
+              color: #0078d4;
+            }
+            .hamburger {
+              display: none;
+              flex-direction: column;
+              justify-content: space-between;
+              width: 30px;
+              height: 21px;
+              background: transparent;
+              border: none;
+              cursor: pointer;
+              padding: 0;
+              z-index: 10;
+            }
+            .hamburger span {
+              width: 100%;
+              height: 3px;
+              background-color: #2A3440;
+              transition: all 0.3s ease-in-out;
+            }
+            @media screen and (max-width: 768px) {
+              .header-content {
+                padding: 0 15px;
+              }
+              .hamburger {
+                display: flex;
+              }
+              .navigation {
+                position: fixed;
+                top: 57px;
+                left: 0;
+                width: 100%;
+                height: auto;
+                background-color: white;
+                padding: 20px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                display: none;
+                z-index: 1000;
+              }
+              .navigation.active {
+                display: block;
+              }
+              .navigation ul {
+                flex-direction: column;
+                gap: 15px;
+              }
+              .dropdown {
+                position: static;
+                display: none;
+                box-shadow: none;
+                padding-left: 20px;
+              }
+              .has-dropdown.active .dropdown {
+                display: block;
+              }
+            }
+          </style>
+        `;
+
+        const hamburger = this.topPlaceholder.domElement.querySelector('.hamburger');
+        if (hamburger) {
+          hamburger.addEventListener('click', () => this.toggleMenu());
+        }
+
+        // Mobile dropdown toggle
+        const dropdownItems = this.topPlaceholder.domElement.querySelectorAll('.has-dropdown');
+        dropdownItems.forEach(item => {
+          item.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+              e.preventDefault();
+              item.classList.toggle('active');
+            }
+          });
+        });
+      }
+    }
+  }
+}

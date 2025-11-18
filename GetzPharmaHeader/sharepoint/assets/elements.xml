@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Elements xmlns="http://schemas.microsoft.com/sharepoint/">
+    <CustomAction
+        Title="GetzpharmaheaderExtension"
+        Location="ClientSideExtension.ApplicationCustomizer"
+        ClientSideComponentId="90157b75-3f58-45ee-8207-ece1d2e32cce"
+        ClientSideComponentProperties="{&quot;testMessage&quot;:&quot;Test message&quot;}">
+    </CustomAction>
+</Elements>

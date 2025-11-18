@@ -1,0 +1,2 @@
+public generateNavigationHTML(items: INavigationItem[]): string {
+<li class="${hasChildren ? 'has-megamenu' : ''}" data-category="${item.title}">

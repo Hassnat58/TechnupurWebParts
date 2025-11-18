@@ -1,0 +1,46 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "fetchteamsmeetings-client-side-solution",
+    "id": "3a0c2a2d-2a7d-4aa6-809c-71ed34586a65",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.19.0"
+    },"webApiPermissionRequests": [
+      { "resource": "Microsoft Graph","scope": "User.ReadBasic.All"},
+    {"resource": "Microsoft Graph", "scope": "sites.Read.All"},
+    { "resource": "Microsoft Graph", "scope": "User.Read.All" },
+    { "resource": "Microsoft Graph", "scope": "Directory.Read.All" },
+    { "resource": "Microsoft Graph", "scope": "Files.Read.All" }
+  ],
+    "metadata": {
+      "shortDescription": {
+        "default": "fetchteamsmeetings description"
+      },
+      "longDescription": {
+        "default": "fetchteamsmeetings description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "fetchteamsmeetings Feature",
+        "description": "The feature that activates elements of the fetchteamsmeetings solution.",
+        "id": "8f749300-21f1-4080-9b7c-9fe43a703e67",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/fetchteamsmeetings.sppkg"
+  }
+}

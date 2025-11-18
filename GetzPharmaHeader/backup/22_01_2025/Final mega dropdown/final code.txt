@@ -1,0 +1,640 @@
+import {
+  BaseApplicationCustomizer,
+  PlaceholderName,
+  PlaceholderContent
+} from '@microsoft/sp-application-base';
+import { sp } from "@pnp/sp";
+import "@pnp/sp/webs";
+import "@pnp/sp/lists";
+import "@pnp/sp/items";
+import "@pnp/sp/site-users/web";
+import './style.scss';
+
+
+interface INavigationItem {
+  id: number;
+  title: string;
+  url: string;
+  parent: string;
+  order: number;
+  isActive: boolean;
+  description: string;
+  children: INavigationItem[];
+}
+
+export default class HeaderExtensionApplicationCustomizer
+  extends BaseApplicationCustomizer<any> {
+
+  public topPlaceholder: PlaceholderContent | undefined;
+
+  public onInit(): Promise<void> {
+    sp.setup({
+      spfxContext: this.context as any
+    });
+    this.context.placeholderProvider.changedEvent.add(this, this.renderCustomHeader);
+
+    // Call render method for generating the HTML elements.  
+  this.renderCustomHeader();
+
+    return Promise.resolve();
+  }
+
+  public toggleMenu(): void {
+    const nav = document.querySelector('.navigation') as HTMLElement;
+    if (nav) nav.classList.toggle('active');
+  }
+
+  public async fetchNavigationData(): Promise<INavigationItem[]> {
+    try {
+      const items = await sp.web.lists.getByTitle("NavigationMenu")
+        .items.select(
+          "ID",
+          "GP_PrimaryLinkTitle",
+          "GP_PrimaryLinkURL",
+          "GP_PrimaryParent",
+          "GP_Order",
+          "GP_IsActive",
+          "GP_Description"
+        )
+        .filter("GP_IsActive eq 'Yes'")
+        .orderBy("GP_Order", true)
+        .get();
+
+      return this.buildNavigationHierarchy(items);
+    } catch (error) {
+      console.error("Error fetching navigation:", error);
+      return [];
+    }
+  }
+
+  public buildNavigationHierarchy(items: any[]): INavigationItem[] {
+    const itemsMap = new Map<string, INavigationItem>();
+    const rootItems: INavigationItem[] = [];
+
+    items.forEach(item => {
+      itemsMap.set(item.GP_PrimaryLinkTitle, {
+        id: item.ID,
+        title: item.GP_PrimaryLinkTitle,
+        url: item.GP_PrimaryLinkURL?.Url || '',
+        parent: item.GP_PrimaryParent,
+        order: item.GP_Order || 0,
+        isActive: item.GP_IsActive === 'Yes',
+        description: item.GP_Description || '',
+        children: []
+      });
+    });
+
+    items.forEach(item => {
+      const currentItem = itemsMap.get(item.GP_PrimaryLinkTitle);
+      if (currentItem) {
+        if (item.GP_PrimaryParent) {
+          const parentItem = itemsMap.get(item.GP_PrimaryParent);
+          if (parentItem) {
+            parentItem.children.push(currentItem);
+          }
+        } else {
+          rootItems.push(currentItem);
+        }
+      }
+    });
+
+    return this.sortNavigationItems(rootItems);
+  }
+
+  public sortNavigationItems(items: INavigationItem[]): INavigationItem[] {
+    items.sort((a, b) => a.order - b.order);
+    items.forEach(item => {
+      if (item.children.length > 0) {
+        item.children = this.sortNavigationItems(item.children);
+      }
+    });
+    return items;
+  }
+
+  public generateNavigationHTML(items: INavigationItem[]): string {
+    return items.map(item => {
+      const hasChildren = item.children.length > 0;
+      const mainLinkOnClick = item.url ? ` onclick="window.open('${item.url}', '_blank'); return false;"` : '';
+      const titleWithDescription = item.description ? ` title="${item.description}"` : '';
+
+      return `
+        <li class="${hasChildren ? 'has-megamenu' : ''}"${titleWithDescription}>
+          <a href="javascript:void(0);"${mainLinkOnClick}>
+            ${item.title}${hasChildren ? ' <span class="expand-arrow">▼</span>' : ''}
+          </a>
+          ${hasChildren ? `
+            <div class="mega-menu">
+              <div class="mega-menu-content">
+                <div class="mega-menu-categories">
+                  ${this.generateCategoryColumns(item.children)}
+                </div>
+              </div>
+            </div>
+          ` : ''}
+        </li>
+      `;
+    }).join('');
+  }
+
+  public generateCategoryColumns(items: INavigationItem[]): string {
+    return items.map(item => `
+      <div class="mega-menu-column">
+        <h3>
+          <a href="${item.url || 'javascript:void(0);'}" target="_blank">
+            ${item.title}${item.children.length > 0 ? ' <span class="expand-arrow">▼</span>' : ''}
+          </a>
+        </h3>
+        <ul class="mega-menu-list">
+          ${this.generateNestedList(item.children)}
+        </ul>
+      </div>
+    `).join('');
+  }
+
+  private generateNestedList(items: INavigationItem[]): string {
+    return items.map(item => `
+      <li>
+        <a href="${item.url || 'javascript:void(0);'}" target="_blank">
+          ${item.title}${item.children.length > 0 ? ' <span class="expand-arrow">▼</span>' : ''}
+        </a>
+        ${item.children.length > 0 ? `
+          <ul class="submenu-list">
+            ${this.generateNestedList(item.children)}
+          </ul>
+        ` : ''}
+      </li>
+    `).join('');
+  }
+
+  public async renderCustomHeader(): Promise<void> {
+
+
+    if (this.topPlaceholder) return;
+
+    this.topPlaceholder = this.context.placeholderProvider.tryCreateContent(PlaceholderName.Top);
+    if (!this.topPlaceholder?.domElement) return;
+
+    const imageUrl = `${this.context.pageContext.web.absoluteUrl}/SiteAssets/GPLogo.png`;
+    const navigationItems = await this.fetchNavigationData();
+    const currentUser = await this.fetchCurrentUser();
+
+    this.topPlaceholder.domElement.innerHTML = `
+      <header class="header">
+        <div class="header-content">
+          <div class="left-section">
+            <button class="hamburger" aria-label="Toggle menu">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+            <div class="logo">
+              <img src="${imageUrl}" alt="Logo">
+            </div>
+          </div>
+          <nav class="navigation">
+            <ul>
+              ${this.generateNavigationHTML(navigationItems)}
+            </ul>
+          </nav>
+          ${currentUser ? `
+          <div class="user-section">
+            <div class="user-info">
+              <span class="user-name">${currentUser.name}</span>
+              <img src="${currentUser.picture}" alt="${currentUser.name}" class="user-image">
+            </div>
+          </div>
+          ` : ''}
+        </div>
+      </header>
+      <style>
+        .header {
+          background-color: white;
+          color: #2A3440;
+          height: 57px;
+          display: flex;
+          align-items: center;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          position: relative;
+          z-index: 1000;
+          width: 100%;
+        }
+
+        .header-content {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+          padding: 0 20px;
+          position: relative;
+        }
+
+        .root-107 {
+          display: none !important;
+          }
+
+        .left-section {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          position: absolute;
+          left: 20px;
+          z-index: 2;
+        }
+
+        .logo img {
+          height: 45px;
+          width: 93.19px;
+        }
+
+        .navigation {
+          flex-grow: 1;
+          display: flex;
+          justify-content: center;
+          margin: 0 auto;
+          position: relative;
+          z-index: 1;
+        }
+
+        .navigation ul {
+          list-style: none;
+          display: flex;
+          margin: 0;
+          padding: 0;
+          gap: 40px;
+          margin-right:200px;
+        }
+
+        .navigation li {
+          position: relative;
+        }
+
+        .navigation a {
+          color: #2A3440;
+          text-decoration: none;
+          font-weight: 500;
+          font-family: 'Barlow';
+          font-size: 14.22px;
+          padding: 8px 16px;
+          display: block;
+          white-space: nowrap;
+        }
+
+        .navigation > ul > li > .dropdown {
+          display: none;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          background: white;
+          min-width: 200px;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+          z-index: 1000;
+          padding: 8px 0;
+        }
+
+        .dropdown .dropdown {
+          display: none;
+          position: absolute;
+          top: 0;
+          left: 100%;
+          margin-left: 0;
+        }
+
+        .navigation > ul > li:hover > .dropdown,
+        .dropdown li:hover > .dropdown {
+          display: block;
+        }
+
+        .dropdown li {
+          width: 100%;
+        }
+
+        .dropdown a {
+          padding: 8px 16px;
+          display: block;
+          color: #2A3440;
+          text-decoration: none;
+        }
+
+        .dropdown li:hover > a {
+          background-color: #f5f5f5;
+          color: #0078d4;
+        }
+
+        .dropdown-arrow {
+          font-size: 8px;
+          margin-left: 4px;
+          transition: transform 0.2s;
+        }
+
+        .has-dropdown:hover .dropdown-arrow {
+          transform: rotate(180deg);
+        }
+
+        .user-section {
+          position: absolute;
+          right: 20px;
+          z-index: 2;
+        }
+
+        .user-info {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .user-name {
+          color: #2A3440;
+          font-family: 'Barlow';
+          font-size: 14px;
+          font-weight: 500;
+        }
+
+        .user-image {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+
+        .hamburger {
+          display: none;
+        }
+
+        @media (max-width: 768px) {
+          .hamburger {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+          }
+
+          .hamburger span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: #2A3440;
+          }
+
+          .header-content {
+            justify-content: flex-start;
+          }
+
+          .left-section {
+            position: relative;
+            left: 0;
+          }
+
+          .navigation {
+            display: none;
+            position: absolute;
+            top: 57px;
+            left: 0;
+            width: 100%;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 0;
+            justify-content: flex-start;
+          }
+
+          .navigation.active {
+            display: block;
+          }
+
+          .navigation ul {
+            flex-direction: column;
+            gap: 10px;
+          }
+
+          .dropdown {
+            position: static !important;
+            display: none;
+            box-shadow: none !important;
+            padding-left: 20px !important;
+          }
+
+          .has-dropdown.active > .dropdown {
+            display: block;
+          }
+
+          .user-section {
+            position: relative;
+            right: 0;
+          }
+        }
+
+        /* Mega Menu Styles */
+        .mega-menu {
+          display: none;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          background: white;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          padding: 30px;
+          z-index: 1000;
+          opacity: 0;
+          transform: translateY(-10px);
+          transition: all 0.3s ease;
+        }
+
+        
+
+        .mega-menu-content {
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+
+        .mega-menu-categories {
+          display: flex;
+          gap: 40px;
+        }
+
+        .mega-menu-column {
+          flex: 1;
+          min-width: 200px;
+        }
+
+        .mega-menu-column h3 {
+          color: #2A3440;
+          font-size: 16px;
+          font-weight: 600;
+          margin-bottom: 15px;
+          padding-bottom: 8px;
+          border-bottom: 1px solid #eee;
+        }
+
+        .mega-menu-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+
+        .mega-menu-list > li {
+          margin-bottom: 15px;
+        }
+
+        .mega-menu-list > li > a {
+          color: #2A3440;
+          font-weight: 500;
+          font-size: 14px;
+          display: block;
+          margin-bottom: 8px;
+        }
+
+        .submenu-list {
+          list-style: none;
+          padding: 0;
+          margin: 0 0 0 15px;
+        }
+
+        .submenu-list li {
+          margin-bottom: 5px;
+        }
+
+        .submenu-list a {
+          color: #666;
+          font-size: 13px;
+          font-weight: normal;
+          transition: color 0.2s ease;
+        }
+
+        .submenu-list a:hover {
+          color: #0078d4;
+        }
+
+        .has-megamenu:hover .mega-menu {
+          display: block;
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+          .mega-menu {
+            position: static;
+            padding: 15px;
+          }
+
+          .mega-menu-categories {
+            flex-direction: column;
+            gap: 20px;
+          }
+
+          .mega-menu-column {
+            width: 100%;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+          }
+
+          .mega-menu-column:last-child {
+            border-bottom: none;
+          }
+        }
+
+        .mega-menu-column h3 a {
+          color: #2A3440;
+          text-decoration: none;
+          transition: color 0.2s ease;
+        }
+
+        .mega-menu-column h3 a:hover {
+          color: #0078d4;
+        }
+
+        .expand-arrow {
+          display: inline-block;
+          font-size: 10px;
+          margin-left: 5px;
+          transition: transform 0.2s ease;
+        }
+
+        .has-megamenu:hover .expand-arrow,
+        .mega-menu-column h3:hover .expand-arrow,
+        .mega-menu-list li:hover > a .expand-arrow {
+          transform: rotate(180deg);
+        }
+
+        @media (max-width: 768px) {
+          .expand-arrow {
+            float: right;
+            margin-top: 5px;
+          }
+        }
+
+        /* Hide all items by default */
+        .mega-menu-list > li,
+        .mega-menu-list .submenu-list > li {
+          display: none;
+        }
+
+        /* Show Electronics items when hovering on Electronics */
+        .mega-menu-column:hover > .mega-menu-list > li {
+          display: block;
+        }
+
+        /* Show Phones items when hovering on Phones */
+        .mega-menu-list > li:hover > .submenu-list > li {
+          display: block;
+        }
+
+        /* Show Android Phones items when hovering on Android Phones */
+        .submenu-list > li:hover > .submenu-list > li {
+          display: block;
+        }
+
+        /* Show Samsung items when hovering on Samsung */
+        .submenu-list > li > .submenu-list > li:hover > .submenu-list > li {
+          display: block;
+        }
+
+        /* Keep arrow rotation for all levels */
+        .expand-arrow {
+          display: inline-block;
+          transition: transform 0.3s ease;
+        }
+
+        /* Rotate arrows on hover for all levels */
+        .mega-menu-column:hover > a .expand-arrow,
+        .mega-menu-list > li:hover > a .expand-arrow,
+        .submenu-list > li:hover > a .expand-arrow {
+          transform: rotate(180deg);
+        }
+      </style>
+    `;
+
+    //Hamburger Code
+    const hamburger = this.topPlaceholder.domElement.querySelector('.hamburger');
+    if (hamburger) {
+      hamburger.addEventListener('click', () => this.toggleMenu());
+    }
+
+    const dropdowns = this.topPlaceholder.domElement.querySelectorAll('.has-dropdown');
+    dropdowns.forEach(dropdown => {
+      dropdown.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          e.preventDefault();
+          dropdown.classList.toggle('active');
+        }
+      });
+    });
+  }
+
+  
+  //Current User Logged Name in With Image Function
+  public async fetchCurrentUser() {
+    try {
+      const user = await sp.web.currentUser.get();
+      return {
+        name: user.Title,
+        email: user.Email,
+        picture: `${this.context.pageContext.web.absoluteUrl}/_layouts/15/userphoto.aspx?size=S&accountname=${user.Email}`
+      };
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      return null;
+    }
+  }
+}

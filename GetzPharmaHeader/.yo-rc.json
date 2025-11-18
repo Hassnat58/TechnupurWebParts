@@ -1,0 +1,22 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "16.19.0",
+    "sdksVersions": {
+      "@microsoft/microsoft-graph-client": "3.0.2",
+      "@microsoft/teams-js": "2.12.0"
+    },
+    "version": "1.19.0",
+    "libraryName": "getzpharmaheader",
+    "libraryId": "6533c673-bbf4-4850-88c6-af4ac62c18a9",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "getzpharmaheader",
+    "solutionShortDescription": "getzpharmaheader description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "extension",
+    "extensionType": "ApplicationCustomizer"
+  }
+}

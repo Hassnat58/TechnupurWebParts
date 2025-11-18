@@ -1,0 +1,21 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "16.19.0",
+    "sdksVersions": {
+      "@microsoft/microsoft-graph-client": "3.0.2",
+      "@microsoft/teams-js": "2.12.0"
+    },
+    "version": "1.19.0",
+    "libraryName": "orgchart",
+    "libraryId": "44fcf0d4-3b53-4b51-84b6-a88bb81dece1",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "orgchart",
+    "solutionShortDescription": "orgchart description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}

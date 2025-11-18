@@ -1,0 +1,162 @@
+import * as React from 'react';
+import styles from './Fetchcalendarmeetingswebpart.module.scss';
+import type { IFetchcalendarmeetingswebpartProps } from './IFetchcalendarmeetingswebpartProps';
+import { MSGraphClientV3 } from '@microsoft/sp-http';
+
+export interface IMeeting {
+  id: string;
+  subject: string;
+  start: { dateTime: string; timeZone: string };
+  end: { dateTime: string; timeZone: string };
+  location: { displayName: string };
+  attendees: Array<{ emailAddress: { name: string; address: string } }>;
+}
+
+interface IFetchcalendarmeetingswebpartState {
+  meetings: IMeeting[];
+  loading: boolean;
+  error: string | null;
+}
+
+export default class Fetchcalendarmeetingswebpart extends React.Component<
+  IFetchcalendarmeetingswebpartProps,
+  IFetchcalendarmeetingswebpartState
+> {
+  constructor(props: IFetchcalendarmeetingswebpartProps) {
+    super(props);
+
+    this.state = {
+      meetings: [],
+      loading: true,
+      error: null,
+    };
+  }
+
+  
+  //Fetch Teams Meetings
+  public fetchMeetings = (): void => {
+    this.props.context.msGraphClientFactory
+      .getClient('3')
+      .then((msGraphClient: MSGraphClientV3): void => {
+        const startDate = new Date().toISOString();
+        const endDate = new Date(new Date().setDate(new Date().getDate() + 7)).toISOString();
+  
+        msGraphClient
+          .api(`/me/calendarView?startDateTime=${startDate}&endDateTime=${endDate}`)
+          .version('v1.0')
+          .select('id,subject,start,end,location,attendees')
+          .orderby('start/dateTime')
+          .get()
+          .then((res: any) => {
+            console.log('API Response:', res); // Log the response
+            this.setState({ meetings: res.value, loading: false });
+          })
+          .catch((err: any) => {
+            console.error('Graph API Error:', err);
+            this.setState({
+              error: err.message || 'An error occurred while fetching meetings.',
+              loading: false,
+            });
+          });
+      })
+      .catch((err) => {
+        console.error('Graph Client Error:', err);
+        this.setState({
+          error: 'Failed to initialize Microsoft Graph Client.',
+          loading: false,
+        });
+      });
+  };
+  
+  
+
+  // public fetchMeetings = (): void => {
+  //   this.props.context.msGraphClientFactory
+  //     .getClient('3')
+  //     .then((msGraphClient: MSGraphClientV3): void => {
+  //       const startDate = new Date().toISOString();
+  //       const endDate = new Date(new Date().setDate(new Date().getDate() + 7)).toISOString();
+  
+  //       msGraphClient
+  //         .api(`/me/calendarView?startDateTime=${startDate}&endDateTime=${endDate}`)
+  //         .version('v1.0')
+  //         .select('id,subject,start,end,location,attendees')
+  //         .orderby('start/dateTime')
+  //         .get((err, res: any) => {
+  //           if (err) {
+  //             this.setState({
+  //               error: err.message || 'An error occurred while fetching meetings.',
+  //               loading: false,
+  //             });
+  //           } else {
+  //             this.setState({ meetings: res.value, loading: false });
+  //           }
+  //         });
+  //     });
+  // };
+
+  // public fetchMeetings = async (): Promise<void> => {
+  //   try {
+  //     const graphClient = await this.props.context.msGraphClientFactory.getClient('3');
+  //     const startDate = new Date().toISOString();
+  //     const endDate = new Date(new Date().setDate(new Date().getDate() + 7)).toISOString();
+
+  //     const response = await graphClient
+  //       .api(`/me/calendarView?startDateTime=${startDate}&endDateTime=${endDate}`)
+  //       .version("v1.0")
+  //       .select('id,subject,start,end,location,attendees')
+  //       .orderby('start/dateTime')
+  //       .get();
+
+  //     this.setState({ meetings: response.value, loading: false });
+  //   } catch (err) {
+  //     this.setState({
+  //       error: err.message || 'An error occurred while fetching meetings.',
+  //       loading: false,
+  //     });
+  //   }
+  // };
+
+  
+  //ComponentDidMount Function
+  
+  public componentDidMount(): void {
+    this.fetchMeetings();
+  }
+
+  
+  //Render Part
+  public render(): React.ReactElement<IFetchcalendarmeetingswebpartProps> {
+    const { meetings, loading, error } = this.state;
+
+    if (loading) {
+      return <div className={styles.loader}>Loading...</div>;
+    }
+
+    if (error) {
+      return <div className={styles.error}>{error}</div>;
+    }
+
+    return (
+      <div className={styles.fetchcalendarmeetingswebpart}>
+        <h2>Meetings Calendar</h2>
+        {meetings.length === 0 ? (
+          <p>No upcoming meetings.</p>
+        ) : (
+          meetings.map((meeting) => (
+            <div key={meeting.id} className={styles.meetingCard}>
+              <h3>{meeting.subject}</h3>
+              <p>Start: {new Date(meeting.start.dateTime).toLocaleString()}</p>
+              <p>End: {new Date(meeting.end.dateTime).toLocaleString()}</p>
+              <p>Location: {meeting.location.displayName || 'Online'}</p>
+              <p>
+                Attendees:{' '}
+                {meeting.attendees.map((attendee) => attendee.emailAddress.name).join(', ') || 'None'}
+              </p>
+            </div>
+          ))
+        )}
+      </div>
+    );
+  }
+}

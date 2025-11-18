@@ -1,0 +1,21 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "16.19.0",
+    "sdksVersions": {
+      "@microsoft/microsoft-graph-client": "3.0.2",
+      "@microsoft/teams-js": "2.12.0"
+    },
+    "version": "1.19.0",
+    "libraryName": "eventswebpart",
+    "libraryId": "de0fafed-49ab-4da8-a8a0-18cbe58c7b09",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "eventswebpart",
+    "solutionShortDescription": "eventswebpart description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}

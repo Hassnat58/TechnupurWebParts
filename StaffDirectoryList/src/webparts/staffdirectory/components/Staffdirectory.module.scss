@@ -1,0 +1,193 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+// :global {
+//   #workbenchPageContent,
+//   .CanvasComponent.LCS .CanvasZone {
+//     max-width: 75% !important;
+//     padding: 0% !important;
+//   }
+//   .ControlZone {
+//     margin: 24px 0 !important;
+//     padding: 0px !important;
+//   }
+ 
+// }
+
+.staffDirectoryContainer {
+  
+  background: #fff;
+  border-radius: 10px;
+  //font-family: 'Barlow', sans-serif !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2A3440CC;;
+  padding: 10px 20px;
+  border-radius: 10px 10px 0 0;
+  color: #ffffff;
+  font-weight: 400;
+  .titleDiv{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 8px;
+    font-weight: 400;
+  
+   
+  }
+  h3 {
+    font-size: 1.2rem;
+    margin: 0;
+    font-weight: 400;
+
+    display: flex;
+    align-items: center;
+  }
+
+  .viewAll {
+    font-weight: 400;
+
+    font-size:12px;
+    color: #ffffff;
+  
+    text-decoration: none;
+  }
+}
+
+.searchBar {
+  margin-top: 15px;
+  display: flex;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-left:16px;
+  margin-right:16px;
+
+  input {
+    flex: 1;
+    border: none;
+    padding: 10px;
+    outline: none;
+    font-size: 14px;
+  }
+
+  .searchButton {
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    background: #fff;
+    
+    
+  }
+}
+/*Scroll bar nav*/
+::-webkit-scrollbar {
+  width: 7px !important; 
+    
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: rgb(221, 218, 218); 
+  -webkit-border-radius: auto;
+  border-radius: auto;
+  
+  background:none;    
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  -webkit-border-radius:auto;
+  border-radius:8px;
+  
+  background:rgb(221, 218, 218); 
+  -webkit-box-shadow:auto; 
+}
+
+
+::-webkit-scrollbar {
+  all:unset;
+}
+.tableContainer {
+ 
+  border-radius: 8px;
+  @media (max-width: 768px) {
+    overflow-x: auto; /* Enable horizontal scrolling */
+   }
+  
+}
+
+.table {
+  // margin:5px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    width: max-content; /* Ensure the table content defines its width */
+    min-width: 100%; 
+    }
+
+  /* Table Header */
+  .tableHeader,
+  .tableRow {
+    display: grid;
+    grid-template-columns: 3fr 3fr 3fr 3fr 3fr 2fr; /* Define consistent column widths */
+    align-items: left;
+    padding: 10px;
+    @media (max-width: 768px) {
+      grid-template-columns: 2fr 3fr 3fr 2fr 2fr 3fr; /* Define consistent column widths */
+    
+      }
+  }
+
+  /* Header Styling */
+  .tableHeader {
+    background: #F5F6F8;;
+    color: #2A3440;
+    font-size: 14px;
+    font-weight: 550;
+
+    div {
+      text-align: left;
+    }
+  }
+
+  /* Body Styling */
+  .tableBody {
+    overflow-y: auto;
+    max-height: 225px;
+    min-height: 225px;
+    margin: 2px;
+    border-radius: 10px;
+
+    .tableRow {
+      background: #fff;
+      border-bottom: 1px solid #ccc;
+
+      div {
+        text-align: left;
+        font-size: 12px;
+        padding: 4px;
+        white-space: normal; /* Allow wrapping */
+        overflow-wrap: break-word; /* Handle long words */
+        word-wrap: break-word; /* Compatibility */
+        word-break: break-word;
+      }
+
+      &:hover {
+        background: #f0f8ff;
+      }
+    }
+
+    .tableRow:last-child {
+      border-bottom: none;
+    }
+  }
+}

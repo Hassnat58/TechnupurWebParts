@@ -1,0 +1,317 @@
+import {
+  BaseApplicationCustomizer,
+  PlaceholderName,
+  PlaceholderContent
+} from '@microsoft/sp-application-base';
+import { sp } from "@pnp/sp";
+import "@pnp/sp/webs";
+import "@pnp/sp/lists";
+import "@pnp/sp/items";
+
+export interface IGetzpharmaheaderExtensionApplicationCustomizerProperties {
+  testMessage: string;
+}
+
+export default class GetzpharmaheaderExtensionApplicationCustomizer
+  extends BaseApplicationCustomizer<IGetzpharmaheaderExtensionApplicationCustomizerProperties> {
+
+  public topPlaceholder: PlaceholderContent | undefined;
+
+  public onInit(): Promise<void> {
+    sp.setup({
+      spfxContext: this.context as any
+    });
+    this.context.placeholderProvider.changedEvent.add(this, this.renderCustomHeader);
+    return Promise.resolve();
+  }
+
+  public toggleMenu(): void {
+    const nav = document.querySelector('.navigation') as HTMLElement;
+    if (nav) {
+      nav.classList.toggle('active');
+    }
+  }
+
+  public async fetchNavigationData() {
+    try {
+      const headerItems = await sp.web.lists.getByTitle("Header")
+        .items.select("ID", "GP_PrimaryLinkTitle").get();
+
+      const subHeaderItems = await sp.web.lists.getByTitle("SubHeader")
+        .items.select("PrimaryLinkIDL/ID", "GP_SublinkTitle", "GP_SublinkURL")
+        .expand("PrimaryLinkIDL")
+        .get();
+
+      console.log('Raw SubHeader Items:', subHeaderItems);
+
+      return headerItems.map(item => ({
+        title: item.GP_PrimaryLinkTitle,
+        subLinks: subHeaderItems
+          .filter(subItem => subItem.PrimaryLinkIDL?.ID === item.ID)
+          .map(subItem => {
+            // Handle URL field which comes as an object with Url property
+            const urlValue = subItem.GP_SublinkURL ? subItem.GP_SublinkURL.Url : '';
+            console.log('Processing URL for', subItem.GP_SublinkTitle, ':', urlValue);
+            return {
+              title: subItem.GP_SublinkTitle,
+              url: urlValue
+            };
+          })
+      }));
+    } catch (error) {
+      console.error("Error fetching navigation:", error);
+      return [];
+    }
+  }
+
+  public async renderCustomHeader(): Promise<void> {
+    if (!this.topPlaceholder) {
+      this.topPlaceholder = this.context.placeholderProvider.tryCreateContent(PlaceholderName.Top);
+
+      if (this.topPlaceholder && this.topPlaceholder.domElement) {
+        const imageUrl = this.context.pageContext.web.absoluteUrl + '/SiteAssets/GPLogo.png';
+        const navigationItems = await this.fetchNavigationData();
+        
+        console.log('Navigation Items:', navigationItems); // Debug navigation items
+        
+        const navigationHtml = navigationItems.map(item => {
+          const hasSubLinks = item.subLinks && item.subLinks.length > 0;
+          return `
+          <li class="${hasSubLinks ? 'has-dropdown' : ''}">
+            <a href="javascript:void(0);">${item.title}${hasSubLinks ? ' <span class="dropdown-arrow">▼</span>' : ''}</a>
+            ${hasSubLinks ? `
+              <ul class="dropdown">
+                ${item.subLinks.map(subLink => {
+                  if (!subLink.url) return `<li><a href="javascript:void(0);">${subLink.title}</a></li>`;
+                  return `<li><a href="javascript:void(0);" onclick="window.open('${subLink.url}', '_blank'); return false;">${subLink.title}</a></li>`;
+                }).join('')}
+              </ul>
+            ` : ''}
+          </li>
+        `}).join('');
+
+        this.topPlaceholder.domElement.innerHTML = `
+          <header class="header">
+            <div class="header-content">
+              <div class="left-section">
+                <button class="hamburger" aria-label="Toggle menu">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </button>
+                <div class="logo">
+                  <img src="${imageUrl}" alt="Getz Pharma Logo">
+                </div>
+              </div>
+              <nav class="navigation">
+                <ul>
+                  ${navigationHtml}
+                </ul>
+              </nav>
+            </div>
+          </header>
+          <style>
+            .header {
+              background-color: white;
+              color: #FFFFFF;
+              height: 57px;
+              display: flex;
+              align-items: center;
+              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+              position: relative;
+              z-index: 1000;
+              width: 100%;
+            }
+            .header-content {
+              display: flex;
+              align-items: center;
+              width: 100%;
+              padding: 0 20px;
+              margin: 0 auto;
+              position: relative;
+            }
+            .left-section {
+              display: flex;
+              align-items: center;
+              gap: 15px;
+              flex-shrink: 0;
+            }
+            .logo {
+              margin-right: 20px;
+            }
+            .logo img {
+              height: 45px;
+              width: 93.19px;
+            }
+            .navigation {
+              flex-grow: 1;
+              display: flex;
+              justify-content: center;
+            }
+            .navigation ul {
+              list-style: none;
+              display: flex;
+              margin: 0;
+              padding: 0;
+              gap: 40px;
+            }
+            .navigation li {
+              margin: 0;
+              position: relative;
+            }
+            .navigation a {
+              color: #2A3440;
+              text-decoration: none;
+              font-weight: 500;
+              font-family: 'Barlow';
+              line-height: 17.07px;
+              font-size: 14.22px;
+              white-space: nowrap;
+              padding: 8px 16px;
+              display: block;
+              transition: color 0.2s ease;
+            }
+            .navigation a:hover {
+              color: #0078d4;
+            }
+            .dropdown-arrow {
+              font-size: 8px;
+              margin-left: 4px;
+              display: inline-block;
+              vertical-align: middle;
+              color: #666;
+              transition: transform 0.2s ease;
+            }
+            .has-dropdown:hover .dropdown-arrow {
+              transform: rotate(180deg);
+              color: #0078d4;
+            }
+            .dropdown {
+              display: none;
+              position: absolute;
+              top: 100%;
+              left: 0;
+              background: white;
+              min-width: 200px;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+              padding: 8px 0;
+              z-index: 1000;
+              opacity: 0;
+              visibility: hidden;
+              transition: opacity 0.2s ease, visibility 0.2s ease;
+            }
+            .has-dropdown {
+              position: relative;
+            }
+            .has-dropdown:hover .dropdown {
+              display: block;
+              opacity: 1;
+              visibility: visible;
+            }
+            .dropdown li {
+              padding: 0;
+              margin: 0;
+              transition: background-color 0.2s ease;
+            }
+            .dropdown li a {
+              color: #2A3440;
+              text-decoration: none;
+              display: block;
+              white-space: nowrap;
+              padding: 8px 16px;
+              transition: color 0.2s ease;
+            }
+            .dropdown li:hover {
+              background-color: #f5f5f5;
+            }
+            .dropdown li:hover a {
+              color: #0078d4;
+            }
+            .hamburger {
+              display: none;
+              flex-direction: column;
+              justify-content: space-between;
+              width: 30px;
+              height: 21px;
+              background: transparent;
+              border: none;
+              cursor: pointer;
+              padding: 0;
+              z-index: 10;
+            }
+            .hamburger span {
+              width: 100%;
+              height: 3px;
+              background-color: #2A3440;
+              transition: all 0.3s ease-in-out;
+            }
+            @media screen and (max-width: 768px) {
+              .header-content {
+                padding: 0 15px;
+              }
+              .hamburger {
+                display: flex;
+              }
+              .navigation {
+                position: fixed;
+                top: 57px;
+                left: 0;
+                width: 100%;
+                height: auto;
+                background-color: white;
+                padding: 20px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                display: none;
+                z-index: 1000;
+              }
+              .navigation.active {
+                display: block;
+              }
+              .navigation ul {
+                flex-direction: column;
+                gap: 15px;
+              }
+              .dropdown {
+                position: static;
+                opacity: 1;
+                visibility: visible;
+                display: none;
+                box-shadow: none;
+                padding-left: 20px;
+                transition: none;
+              }
+              .has-dropdown:hover .dropdown {
+                display: none;
+              }
+              .has-dropdown.active .dropdown {
+                display: block;
+              }
+              .dropdown li {
+                padding: 0;
+              }
+              .dropdown li a {
+                padding: 8px 0;
+              }
+            }
+          </style>
+        `;
+
+        const hamburger = this.topPlaceholder.domElement.querySelector('.hamburger');
+        if (hamburger) {
+          hamburger.addEventListener('click', () => this.toggleMenu());
+        }
+
+        // Mobile dropdown toggle
+        const dropdownItems = this.topPlaceholder.domElement.querySelectorAll('.has-dropdown');
+        dropdownItems.forEach(item => {
+          item.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+              e.preventDefault();
+              item.classList.toggle('active');
+            }
+          });
+        });
+      }
+    }
+  }
+}

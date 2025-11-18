@@ -1,0 +1,81 @@
+import * as React from 'react';
+import styles from './Fetchteamsmeetingswebpart.module.scss';
+import type { IFetchteamsmeetingswebpartProps } from './IFetchteamsmeetingswebpartProps';
+import { DetailsList, TextField } from '@fluentui/react';
+import { MSGraphClientV3 } from '@microsoft/sp-http';
+
+export interface IUser {
+  displayName: string;
+  mail: string;
+}
+
+export interface IUserState {
+  userState: IUser[];
+  filteredUsers: IUser[];
+}
+
+export default class Fetchteamsmeetingswebpart extends React.Component<IFetchteamsmeetingswebpartProps, IUserState, {}> {
+  constructor(props: IFetchteamsmeetingswebpartProps) {
+    super(props);
+    this.state = { userState: [], filteredUsers: [] };
+  }
+
+  public allusers: IUser[] = [];
+
+  public GetUsers = (): void => {
+    this.props.context.msGraphClientFactory
+      .getClient('3') // Specify version 3
+      .then((msGraphClient: MSGraphClientV3): void => {
+        msGraphClient.api("users").version("v1.0").select("displayName,mail").get((err, res: any) => {
+          if (err) {
+            console.log("Error Occured", err);
+          }
+          console.log("Response", res);
+          res.value.map((result: any) => {
+            this.allusers.push({
+              displayName: result.displayName,
+              mail: result.mail,
+            });
+          });
+          this.setState({ userState: this.allusers, filteredUsers: this.allusers });
+        });
+      });
+  };
+
+  componentDidMount() {
+    this.GetUsers();
+  }
+
+  public handleSearch = (value: string): void => {
+    const filteredUsers = this.state.userState.filter((user) => {
+      const displayName = user.displayName || '';
+      const mail = user.mail || '';
+      return displayName.toLowerCase().includes(value.toLowerCase()) || mail.toLowerCase().includes(value.toLowerCase());
+    });
+    this.setState({ filteredUsers });
+  };
+
+  public render(): React.ReactElement<IFetchteamsmeetingswebpartProps> {
+    return (
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h2>Staff Directory</h2>
+          <TextField
+            placeholder="Search users..."
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) => this.handleSearch(event.currentTarget.value)}
+            className={styles['search-input']}
+          />
+        </div>
+        <div className={styles.content}>
+          <DetailsList
+            items={this.state.filteredUsers}
+            columns={[
+              { key: 'displayName', name: 'Name', fieldName: 'displayName', minWidth: 200 },
+              { key: 'mail', name: 'Email', fieldName: 'mail', minWidth: 300 },
+            ]}
+          />
+        </div>
+      </div>
+    );
+  }
+}

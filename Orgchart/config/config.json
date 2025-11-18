@@ -1,0 +1,21 @@
+
+
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  
+  "version": "2.0",
+  "bundles": {
+    "orgchart-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/orgchart/OrgchartWebPart.js",
+          "manifest": "./src/webparts/orgchart/OrgchartWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "OrgchartWebPartStrings": "lib/webparts/orgchart/loc/{locale}.js"
+  }
+}
